@@ -546,43 +546,66 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
+            /**
+             * 1.准备工作
+             * 记录下容器的启动时间，标记“已启动”状态，关闭状态为false
+             * 加载当前系统属性到环境对象中，准备一系列监听器以及事件集合对象
+             */
 			// Prepare this context for refreshing.
 			prepareRefresh();
 
+            /**
+             * 2.创建容器对象：DefaultListableBeanFactory，加载XML配置文件的属性到当前的工厂中（默认用命名空间来解析），
+             * 就是上面说的BeanDefinition（bean的定义信息）这里还没有初始化，只是配置信息都提取出来了，（包含里面的value值其实都只是占位符）
+             */
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
+            /**
+             *3.BeanFactory的准备工作，设置BeanFactory的类加载器，添加几个BeanPostProcessor，手动注册几个特殊的bean等
+             */
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
 			try {
+                // 4.子类的覆盖方法做额外的处理，BeanFactoryPostProcessor ，
+                // 具体的子类可以在这步的时候添加一些特殊的BeanFactoryPostProcessor完成对beanFactory修改或者扩展。
+                // 到这里的时候，所有的Bean都加载、注册完成了，但是都还没有初始化
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
-				invokeBeanFactoryPostProcessors(beanFactory);
+                // 5.调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
+                invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
-				registerBeanPostProcessors(beanFactory);
+                // 6.注册 BeanPostProcessor  处理器 这里只是注册功能，真正的调用的是getBean方法
+                registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+                // 7.初始化当前 ApplicationContext 的 MessageSource，即国际化处理
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+                // 8.初始化当前 ApplicationContext 的事件广播器，
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				onRefresh();
+                // 9.从方法名就可以知道，典型的模板方法(钩子方法)，具体的子类可以在这里初始化一些特殊的Bean（在初始化 singleton beans 之前）
+                onRefresh();
 
 				// Check for listener beans and register them.
-				registerListeners();
+                // 10.注册事件监听器，监听器需要实现 ApplicationListener 接口。
+                registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+                // 11.初始化所有的 singleton beans（lazy-init 的除外）
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+                // 12.广播事件，ApplicationContext 初始化完成
 				finishRefresh();
 			}
 
@@ -614,6 +637,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Prepare this context for refreshing, setting its startup date and
 	 * active flag as well as performing any initialization of property sources.
+     * 记录下容器的启动时间，标记“已启动”状态，关闭状态为false
+     * 加载当前系统属性到环境对象中，准备一系列监听器以及事件集合对象
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
@@ -915,6 +940,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+        // 实例化剩下的所有的单例对象（非懒加载的）
 		beanFactory.preInstantiateSingletons();
 	}
 

@@ -49,6 +49,8 @@ import org.springframework.lang.Nullable;
  * and {@code containsBeanDefinition}, the methods in this interface
  * are not designed for frequent invocation. Implementations may be slow.
  *
+ * 提供了批量获取Bean的方法
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001

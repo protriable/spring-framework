@@ -563,9 +563,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Instantiate the bean.
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
+            // 判断如果是单例对象，则从factoryBean实例缓存汇总移除当前Bean的定义信息
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+            // 根据执行的bean使用的对应的策略创建新的实例。也可以理解实例化对象，在内存总开辟空间
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -590,6 +592,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+        // 判断当前bean是否需要提前曝光，单例&允许循环依赖&当前bean正在创建，检测循环依赖
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -597,13 +600,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.trace("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
+            // 在bean的初始化完成之前将创建的实例加入ObjectFactory（添加三级缓存），主要是为了防止后期的循环依赖。。。。重点
+            // AOP会把原始对象替换成代理对象
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+            // 填充bean属性，假设其中存在依赖于其他的bean的属性，则会递归初始化依赖的bean
 			populateBean(beanName, mbd, instanceWrapper);
+            //执行初始化逻辑
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1428,6 +1435,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (pvs != null) {
+            // 应用给定的属性值，解决任何在这个bean工厂运行时其他的bean的调用（就是设置属性值）
 			applyPropertyValues(beanName, mbd, bw, pvs);
 		}
 	}
@@ -1624,6 +1632,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Apply the given property values, resolving any runtime references
 	 * to other beans in this bean factory. Must use deep copy, so we
 	 * don't permanently modify this property.
+     *
+     *  应用给定的属性值，解决任何在这个bean工厂运行时其他的bean的调用（就是设置属性值）
+     *
 	 * @param beanName the bean name passed for better exception information
 	 * @param mbd the merged bean definition
 	 * @param bw the BeanWrapper wrapping the target object
@@ -1665,12 +1676,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Create a deep copy, resolving any references for values.
 		List<PropertyValue> deepCopy = new ArrayList<>(original.size());
 		boolean resolveNecessary = false;
+        // 遍历属性，将属性转换为对应类的对应属性类型
 		for (PropertyValue pv : original) {
+            // 判断当前属性是否已经解析过
 			if (pv.isConverted()) {
 				deepCopy.add(pv);
 			}
 			else {
+                // 获取属性名称
 				String propertyName = pv.getName();
+                // 获取属性值
 				Object originalValue = pv.getValue();
 				if (originalValue == AutowiredPropertyMarker.INSTANCE) {
 					Method writeMethod = bw.getPropertyDescriptor(propertyName).getWriteMethod();
@@ -1679,8 +1694,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 					originalValue = new DependencyDescriptor(new MethodParameter(writeMethod, 0), true);
 				}
-				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
+                // valueResolver处理pv解析出的originalValue封装的对象（是否必要开始去处理属性值了）重点
+                Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
+                // 默认转换后的值等于解析出来的值
 				Object convertedValue = resolvedValue;
+                // 判断转换标记
 				boolean convertible = bw.isWritableProperty(propertyName) &&
 						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
 				if (convertible) {

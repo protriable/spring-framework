@@ -675,6 +675,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 				// Get as late as possible to minimize the time we "own" the target, in case it comes from a pool...
 				target = targetSource.getTarget();
 				Class<?> targetClass = (target != null ? target.getClass() : null);
+                // 从advised中 获取配置好的AOP的通知方法
 				List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 				Object retVal;
 				// Check whether we only have one InvokerInterceptor: that is,
@@ -685,8 +686,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// it does nothing but a reflective operation on the target, and no hot
 					// swapping or fancy proxying.
 					Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
-					try {
-						retVal = methodProxy.invoke(target, argsToUse);
+                    try {
+                        // 如果没有配置通知方法，则直接调用target对象的调用方法
+                        retVal = methodProxy.invoke(target, argsToUse);
 					}
 					catch (CodeGenerationException ex) {
 						CglibMethodInvocation.logFastClassGenerationFailure(method);
@@ -695,7 +697,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 				}
 				else {
 					// We need to create a method invocation...
-					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
+                    // 通过CglibMethodInvocation来启动advice通知
+                    retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
 				retVal = processReturnType(proxy, target, method, retVal);
 				return retVal;

@@ -100,22 +100,36 @@ import org.springframework.lang.Nullable;
  * @author Chris Beams
  * @since 13 April 2001
  * @see BeanNameAware#setBeanName
+ *      在创建此bean的bean工厂中设置bean的名称，在普通属性设置之后调用，在InitializinngBean.afterPropertiesSet()方法之前调用
  * @see BeanClassLoaderAware#setBeanClassLoader
+ *      将 bean ClassLoaderr 提供给 bean 实例的回调
  * @see BeanFactoryAware#setBeanFactory
+ *      回调提供了自己的bean实例工厂，在普通属性设置之后，在InitializingBean.afterPropertiesSet()或者自定义初始化方法之前调用
  * @see org.springframework.context.EnvironmentAware#setEnvironment
  * @see org.springframework.context.EmbeddedValueResolverAware#setEmbeddedValueResolver
  * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
+ *      在普通bean对象之后调用，在初始化调用afterPropertiesSet 或者自定义初始化方法之前调用，在 ApplicationContextAware 之前调用。
  * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher
+ *      在普通bean属性之后调用，在初始化调用afterPropertiesSet 或者自定义初始化方法之前调用，在 ApplicationContextAware 之前调用。
  * @see org.springframework.context.MessageSourceAware#setMessageSource
+ *      在普通bean属性之后调用，在初始化调用afterPropertiesSet 或者自定义初始化方法之前调用，在 ApplicationContextAware 之前调用。
  * @see org.springframework.context.ApplicationContextAware#setApplicationContext
+ *      在普通Bean对象生成之后调用，在InitializingBean.afterPropertiesSet之前调用或者用户自定义初始化方法之前。
+ *      在ResourceLoaderAware.setResourceLoader，ApplicationEventPublisherAware.setApplicationEventPublisher，MessageSourceAware之后调用
  * @see org.springframework.web.context.ServletContextAware#setServletContext
+ *      运行时设置ServletContext，在普通bean初始化后调用
  * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization
+ *      将此BeanPostProcessor 应用于给定的新bean实例
  * @see InitializingBean#afterPropertiesSet
+ *      在设置所有 bean 属性后由包含的 BeanFactory调用
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getInitMethodName
+ *      获取InitMethodName名称，并且运行初始化方法
  * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization
  * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor#postProcessBeforeDestruction
  * @see DisposableBean#destroy
+ *      销毁
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
+ *      返回被销毁的bean名称
  */
 public interface BeanFactory {
 

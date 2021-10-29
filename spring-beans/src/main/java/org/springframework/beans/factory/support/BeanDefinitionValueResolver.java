@@ -108,8 +108,10 @@ class BeanDefinitionValueResolver {
 	public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
+        // 如果value是RuntimeBeanReference实例 则处理
 		if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+            // 解析出对应的ref 所封装的Bean元信息（Bean的名称，Bean的类型） 的对象
 			return resolveReference(argName, ref);
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
@@ -327,13 +329,16 @@ class BeanDefinitionValueResolver {
 				}
 				else {
 					resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
+                    // 获取resolvedName的Bean对象 重点
 					bean = this.beanFactory.getBean(resolvedName);
 				}
+                // 注册beanName到dependentBeanName的依赖关系到Bean的工中
 				this.beanFactory.registerDependentBean(resolvedName, this.beanName);
 			}
 			if (bean instanceof NullBean) {
 				bean = null;
 			}
+            // 返回解析出来的对用的ref所封装的Bean对象
 			return bean;
 		}
 		catch (BeansException ex) {

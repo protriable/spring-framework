@@ -42,6 +42,8 @@ import org.springframework.util.StringValueResolver;
  * needs. This extended interface is just meant to allow for framework-internal
  * plug'n'play and for special access to bean factory configuration methods.
  *
+ * 单例bean的注册以及生成实例，统计单例bean等信息
+ *
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see org.springframework.beans.factory.BeanFactory

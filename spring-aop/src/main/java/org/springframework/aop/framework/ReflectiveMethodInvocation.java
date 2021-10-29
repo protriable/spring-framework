@@ -159,15 +159,18 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Nullable
 	public Object proceed() throws Throwable {
 		// We start with an index of -1 and increment early.
-		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+        // 从索引为-1的拦截器开始调用，并且按顺序递增，如果整个List chain中调用完毕，则开始调用target的函数
+        // 具体的实现方式在AOPUtils.invokeJoinpointUsingRefection方法中，说白了就是通过反射实现目标方法
+        if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
-
+        // 获取下一个需要执行的拦截器，沿着定义好的interceptorOrInterceptionAdvice的链进行处理
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
+            // 对拦截器进行动态匹配，如果和定义的pointcut匹配 则就会执行当前的这个advice
 			InterceptorAndDynamicMethodMatcher dm =
 					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());

@@ -35,6 +35,8 @@ import org.springframework.lang.Nullable;
  * use cases. This interface is just meant to allow for framework-internal
  * plug'n'play even when needing access to bean factory configuration methods.
  *
+ * 增加了一些其他功能：类加载器、类型转化、属性编辑器、BeanPostProcessor、bean定义、处理bean依赖关系、 bean如何销毁等等一些还有其他的功能
+ *
  * @author Juergen Hoeller
  * @since 03.11.2003
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory()

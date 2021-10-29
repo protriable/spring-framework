@@ -102,6 +102,8 @@ import org.springframework.util.StringUtils;
  * have a look at {@link StaticListableBeanFactory}, which manages existing
  * bean instances rather than creating new ones based on bean definitions.
  *
+ * 实现BeanFactory所有功能同时也能注册BeanDefinition
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -923,6 +925,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				else {
+                    // 如果当前beanName对应的bean不是工厂bean，则通过beanName来获取bean的实例
 					getBean(beanName);
 				}
 			}
