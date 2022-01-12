@@ -139,12 +139,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
 	 * Class objects: for example, String. Default is none.
+     * 需要忽略的依赖项类型，比如实现了 *.aware接口的
 	 */
 	private final Set<Class<?>> ignoredDependencyTypes = new HashSet<>();
 
 	/**
 	 * Dependency interfaces to ignore on dependency check and autowire, as Set of
 	 * Class objects. By default, only the BeanFactory interface is ignored.
+     * 当有忽略的接口类，自动装配会忽略接口方法注入的实例类的自动装配
+     * eg. 比如A implement ApplicationContextAware .在生成bean A的时候不会去注入 ApplicationContext。
+     *  spring 实例化过程后续会单独做Aware的注入操作
 	 */
 	private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
 
@@ -170,6 +174,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
+        //自动装配忽略接口
 		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 		ignoreDependencyInterface(BeanClassLoaderAware.class);
@@ -568,7 +573,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
-            // 根据执行的bean使用的对应的策略创建新的实例。也可以理解实例化对象，在内存总开辟空间
+            // 根据执行的bean使用的对应的策略创建新的实例。也可以理解实例化对象，在内存中开辟空间(实例化非初始化)
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -602,7 +607,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						"' to allow for resolving potential circular references");
 			}
             // 在bean的初始化完成之前将创建的实例加入ObjectFactory（添加三级缓存），主要是为了防止后期的循环依赖。。。。重点
-            // AOP会把原始对象替换成代理对象
+            // AOP会把原始对象替换成代理对象(ProxyFactory-实例代理对象在初始化之后生成-applyBeanPostProcessorsBeforeInitialization)
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 
@@ -1779,7 +1784,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
-            //调用BeanPostProcessor.postProcessBeforeInitialization()方法
+            //调用BeanPostProcessor.postProcessBeforeInitialization()方法。 AOP动态代理在这里完成
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 

@@ -577,6 +577,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
                 // 5.调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
+                // 针对BeanFactory
                 invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -589,7 +590,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
-                // 8.初始化当前 ApplicationContext 的事件广播器，
+                // 8.初始化当前 ApplicationContext 的事件广播器
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
@@ -641,7 +642,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      * 加载当前系统属性到环境对象中，准备一系列监听器以及事件集合对象
 	 */
 	protected void prepareRefresh() {
-		// Switch to active.
+		// Switch to active. 启动容器
 		this.startupDate = System.currentTimeMillis();
 		this.closed.set(false);
 		this.active.set(true);
@@ -656,12 +657,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+        // 初始化上下文中的系统属性到环境对象中
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
 		getEnvironment().validateRequiredProperties();
 
+        //保存事件监听器
 		// Store pre-refresh ApplicationListeners...
 		if (this.earlyApplicationListeners == null) {
 			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
@@ -712,6 +715,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        //忽略自动关联的给定依赖项接口 由应用程序上下文用于注册以其他方式解析的依赖项，如通过BeanFactoryAware解析的BeanFactory或通过ApplicationContextAware解析的ApplicationContext
+        // 默认情况下，仅忽略BeanFactoryAware接口。对于要忽略的其他类型，请为每个类型调用此方法。
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -782,6 +787,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Instantiate and register all BeanPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
+     * 注册BeanPostProcessors Bean后置处理器
 	 */
 	protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);

@@ -81,6 +81,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.aop.TargetSource}. If there are no TargetSourceCreators set,
  * or if none matches, a {@link org.springframework.aop.target.SingletonTargetSource}
  * will be used by default to wrap the target bean instance.
+ * AOP类
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -335,6 +336,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			return bean;
 		}
 
+        //切面制造机
 		// Create proxy if we have advice.
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {

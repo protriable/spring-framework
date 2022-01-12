@@ -330,6 +330,7 @@ class BeanDefinitionValueResolver {
 				else {
 					resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
                     // 获取resolvedName的Bean对象 重点
+                    // 如果依赖的bean没有创建会在这里创建
 					bean = this.beanFactory.getBean(resolvedName);
 				}
                 // 注册beanName到dependentBeanName的依赖关系到Bean的工中

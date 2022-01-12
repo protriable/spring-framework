@@ -100,6 +100,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 								// Temporarily return non-post-processed object, not storing it yet..
 								return object;
 							}
+                            //标记该bean正在创建中
 							beforeSingletonCreation(beanName);
 							try {
 								object = postProcessObjectFromFactoryBean(object, beanName);
